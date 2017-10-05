@@ -16,7 +16,7 @@ def mkempty(f):
     """
     Create f as an empty file
     """
-    open(f, 'w').close() 
+    open(f, 'w').close()
 
 def is_node_exe(path):
     try:
@@ -35,7 +35,7 @@ def find_node():
                  "/usr/local/bin/node",
                  "C:/Program Files/nodejs/node.exe",
                  "C:/Program Files (x86)/nodejs/node.exe"]
-    l = filter(is_node_exe, LOCATIONS)
+    l = list(filter(is_node_exe, LOCATIONS))
     if len(l) == 0:
         print('Could not find the node.js executable. node.js is required for Jalangi')
         print('If you have installed node.js in a non-standard location you can set environment variable NODE_EXECUTABLE to the full path of the node executable.')
@@ -59,7 +59,7 @@ def execute_return(script, **kwargs):
     print(' '.join(cmd))
     with NamedTemporaryFile() as f:
          try:
-             subprocess.check_call(cmd,stdout=f, 
+             subprocess.check_call(cmd,stdout=f,
                                    stderr=f if saveStdErr else open(os.devnull, 'wb'),bufsize=1000)
              f.seek(0)
              return f.read()
@@ -95,7 +95,7 @@ def execute(script, stdin=None, env=None, quiet=False):
         if not quiet:
             print(stdout)
         return stdout
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         print(e.output)
 
 def execute_np(script, *args):
@@ -104,7 +104,7 @@ def execute_np(script, *args):
     return subprocess.call(cmd)
 
 WORKING_DIR = os.getcwd()
-    
+
 JALANGI_HOME = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir))
 
 INSTRUMENTATION_SCRIPT = JALANGI_HOME + "/src/js/commands/esnstrument_cli.js"
@@ -124,7 +124,7 @@ def create_and_cd_jalangi_tmp():
     os.chdir("jalangi_tmp")
 
 def cd_parent():
-    os.chdir('..')        
+    os.chdir('..')
 
 def full_path(file):
     return os.path.abspath(file)
