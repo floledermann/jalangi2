@@ -83,7 +83,7 @@ function getInlinedScripts(analyses, initParams, extraAppScripts, EXTRA_SCRIPTS_
                 headerCode += "<script type=\"text/javascript\" src=\"" + cdn + "/extras.js\"></script>";
             } else {
                 extraAppScripts.forEach(function (script) {
-                    var scriptSrc = path.join(EXTRA_SCRIPTS_DIR, path.basename(script));
+                    var scriptSrc = path.join(EXTRA_SCRIPTS_DIR, script);
                     headerCode += "<script type=\"text/javascript\">";
                     headerCode += fs.readFileSync(scriptSrc);
                     headerCode += "</script>";
