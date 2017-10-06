@@ -25,8 +25,11 @@ var path = require('path');
 var urlParser = require('url');
 
 
-var headerSources = ["node_modules/esotope/esotope.js",
-    "node_modules/acorn/dist/acorn.js"];
+// var headerSources = ["node_modules/esotope/esotope.js",
+//     "node_modules/acorn/dist/acorn.js"];
+
+var headerSources = [require.resolve('esotope/esotope.js'),
+    require.resolve('acorn/dist/acorn.js')];
 
 var headersSet = false;
 
@@ -51,7 +54,7 @@ function getInlinedScripts(analyses, initParams, extraAppScripts, EXTRA_SCRIPTS_
         } else {
             headerSources.forEach(function (src) {
                 if (jalangiRoot) {
-                    src = path.join(jalangiRoot, src);
+                     src = path.resolve(jalangiRoot, src);
                 }
                 headerCode += "<script type=\"text/javascript\">";
                 headerCode += fs.readFileSync(src);
@@ -104,7 +107,7 @@ function getFooterString(jalangiRoot) {
     var footerCode = "";
     footerSources.forEach(function (src) {
         if (jalangiRoot) {
-            src = path.join(jalangiRoot, src);
+            src = path.resolve(jalangiRoot, src);
         }
         if (endsWith(src, ".js")) {
             footerCode += "<script type=\"text/javascript\">";
