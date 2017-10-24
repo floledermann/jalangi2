@@ -366,7 +366,7 @@ if (typeof J$ === 'undefined') {
         return (lastComputedValue = val);
     }
 
-    // variable write
+    // variable read
     // isGlobal means that the variable is global and not declared as var
     // isScriptLocal means that the variable is global and is declared as var
     function R(iid, name, val, flags) {
@@ -808,4 +808,3 @@ if (typeof J$ === 'undefined') {
     sandbox.EVAL_ORG = EVAL_ORG;
     sandbox.log = log;
 })(J$);
-
