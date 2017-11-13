@@ -26,6 +26,7 @@ print('Current working directory is ' + WORKING_DIR)
 jalangiArgs = ''
 useCache = True
 ignore = []
+cacheRoot = 'cache'
 
 def processFile (flow, content, ext):
     try:
@@ -33,10 +34,11 @@ def processFile (flow, content, ext):
         name = os.path.splitext(flow.request.path_components[-1])[0] if hasattr(flow.request,'path_components') and len(flow.request.path_components) else 'index'
 
         hash = hashlib.md5(content).hexdigest()
-        fileName = 'cache/' + flow.request.host + '/' + hash + '/' + name + '.' + ext
-        instrumentedFileName = 'cache/' + flow.request.host + '/' + hash + '/' + name + '_jalangi_.' + ext
-        if not os.path.exists('cache/' + flow.request.host + '/' + hash):
-            os.makedirs('cache/' + flow.request.host + '/' + hash)
+        cacheDir = os.path.join(cacheRoot, flow.request.host) #, hash)
+        fileName = os.path.join(cacheDir, name + '.' + ext) #'cache/' + flow.request.host + '/' + hash + '/' + name + '.' + ext
+        instrumentedFileName = os.path.join(cacheDir, name + '_jalangi_.' + ext) #'cache/' + flow.request.host + '/' + hash + '/' + name + '_jalangi_.' + ext
+        if not os.path.exists(cacheDir):
+            os.makedirs(cacheDir)
         if not useCache or not os.path.isfile(instrumentedFileName):
             print('Instrumenting: ' + fileName + ' from ' + url)
             with open(fileName, 'wb') as file:
@@ -62,6 +64,7 @@ def start():
 def _start(argv):
     global jalangiArgs
     global useCache
+    global cacheRoot
 
     # For enabling/disabling instrumentation cache (enabled by default)
     if '--no-cache' in argv:
@@ -70,6 +73,13 @@ def _start(argv):
         argv.remove('--no-cache')
     elif '--cache' in argv:
         argv.remove('--cache')
+
+    cacheLocIdx = argv.index('--cache-location') if '--cache-location' in argv else -1
+    if cacheLocIdx >= 0:
+        argv.pop(cacheLocIdx)
+        cacheRoot = argv[cacheLocIdx]
+        argv.pop(cacheLocIdx)
+        print("######## Cache location: " + cacheRoot)
 
     # For not invoking jalangi for certain URLs
     ignoreIdx = argv.index('--ignore') if '--ignore' in argv else -1
