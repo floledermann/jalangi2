@@ -29,6 +29,9 @@ ignore = []
 cacheRoot = 'cache'
 
 def processFile (flow, content, ext):
+    
+    global cacheRoot
+
     try:
         url = flow.request.scheme + '://' + flow.request.host + ':' + str(flow.request.port) + flow.request.path
         name = os.path.splitext(flow.request.path_components[-1])[0] if hasattr(flow.request,'path_components') and len(flow.request.path_components) else 'index'
@@ -79,7 +82,8 @@ def _start(argv):
         argv.pop(cacheLocIdx)
         cacheRoot = argv[cacheLocIdx]
         argv.pop(cacheLocIdx)
-        print("######## Cache location: " + cacheRoot)
+
+    print("Cache location: " + cacheRoot)
 
     # For not invoking jalangi for certain URLs
     ignoreIdx = argv.index('--ignore') if '--ignore' in argv else -1
