@@ -1551,6 +1551,11 @@ if (typeof J$ === 'undefined') {
             return node;
         }
     };
+    
+    function wrapConsequent(node, consequent) {
+      // TODO wrap consequent
+      return consequent;
+    }
 
     function funCond(node) {
         var ret = wrapConditional(node.test, node.test);
@@ -1558,6 +1563,12 @@ if (typeof J$ === 'undefined') {
         node.test = wrapWithX1(node, node.test);
         node.init = wrapWithX1(node, node.init);
         node.update = wrapWithX1(node, node.update);
+        if (node.consequent) {
+          node.consequent = wrapConsequent(node, node.consequent);
+        }
+        if (node.alternate) {
+          node.alternate = wrapConsequent(node, node.alternate);
+        }
         return node;
     }
 
