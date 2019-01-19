@@ -731,6 +731,13 @@ if (typeof J$ === 'undefined') {
         lastVal = left;
         return (lastComputedValue = left);
     }
+    
+    // End consequent of condition iid
+    function Cx(iid) {
+       if (sandbox.analysis && sandbox.analysis.endConditionalConsequent) {
+         sandbox.analysis.endConditionalConsequent(iid);
+       }    
+    }
 
     function S(iid, f) {
         if (sandbox.analysis && sandbox.analysis.runInstrumentedFunctionBody) {
@@ -777,6 +784,7 @@ if (typeof J$ === 'undefined') {
     sandbox.C = C; // Condition
     sandbox.C1 = C1; // Switch key
     sandbox.C2 = C2; // case label C1 === C2
+    sandbox.Cx = Cx; // end Condition Consequent
     sandbox._ = last;  // Last value passed to C
 
     sandbox.H = H; // hash in for-in

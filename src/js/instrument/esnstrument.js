@@ -813,12 +813,14 @@ if (typeof J$ === 'undefined') {
 
         if (!Config.INSTR_CONDITIONAL || Config.INSTR_CONDITIONAL("other", node)) {
             printCondIidToLoc(node);
+            var iid = getCondIid();
             var ret = replaceInExpr(
                 logConditionalFunName + "(" + RP + "1, " + RP + "2)",
-                getCondIid(),
+                iid,
                 test
             );
             transferLoc(ret, node);
+            ret.iid = iid;
             return ret;
         } else {
             return node;
@@ -1552,22 +1554,70 @@ if (typeof J$ === 'undefined') {
         }
     };
     
-    function wrapConsequent(node, consequent) {
+    function wrapConsequent(condIid, consequent) {
       // TODO wrap consequent
-      return consequent;
+      let consTree = {
+          "type": "BlockStatement",
+          "body": [
+              {
+                  "type": "TryStatement",
+                  "block": {
+                      "type": "BlockStatement",
+                      "body": [
+                        // original statements go here
+                       ]
+                  },
+                  "handler": null,
+                  "finalizer": {
+                      "type": "BlockStatement",
+                      "body": [
+                          {
+                              "type": "ExpressionStatement",
+                              "expression": {
+                                  "type": "CallExpression",
+                                  "callee": {
+                                      "type": "MemberExpression",
+                                      "computed": false,
+                                      "object": {
+                                          "type": "Identifier",
+                                          "name": JALANGI_VAR
+                                      },
+                                      "property": {
+                                          "type": "Identifier",
+                                          "name": "Cx"
+                                      }
+                                  },
+                                  "arguments": [
+                                      condIid
+                                  ]
+                              }
+                          }
+                      ]
+                  }
+              }
+          ]
+      }
+      if (consequent.type == "BlockStatement") {
+        consTree.body[0].block = consequent;
+      }
+      else {
+        consTree.body[0].block[0] = consequent;
+      }
+      return consTree;
     }
 
     function funCond(node) {
         var ret = wrapConditional(node.test, node.test);
+        var condId = ret.iid;
         node.test = ret;
         node.test = wrapWithX1(node, node.test);
         node.init = wrapWithX1(node, node.init);
         node.update = wrapWithX1(node, node.update);
         if (node.consequent) {
-          node.consequent = wrapConsequent(node, node.consequent);
+          node.consequent = wrapConsequent(condId, node.consequent);
         }
         if (node.alternate) {
-          node.alternate = wrapConsequent(node, node.alternate);
+          node.alternate = wrapConsequent(condId, node.alternate);
         }
         return node;
     }
