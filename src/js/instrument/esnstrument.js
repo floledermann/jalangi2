@@ -1555,6 +1555,10 @@ if (typeof J$ === 'undefined') {
     };
     
     function wrapConsequent(condIid, consequent) {
+      
+      // disable for now...
+      return consequent;
+      
       // TODO wrap consequent
       let consTree = {
           "type": "BlockStatement",
@@ -1613,6 +1617,11 @@ if (typeof J$ === 'undefined') {
         node.test = wrapWithX1(node, node.test);
         node.init = wrapWithX1(node, node.init);
         node.update = wrapWithX1(node, node.update);
+        
+        // TODO: types of conditionals:
+        // ConditionalExpression (?-Operator), Logical Shortcuts (x || y, x && y), IfStatement, ForStatement, WhileStatement, Do-While, SwitchStatement
+        // TODO: what happens on Exceptions?!
+
         if (node.consequent) {
           node.consequent = wrapConsequent(condId, node.consequent);
         }
