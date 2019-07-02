@@ -1994,7 +1994,7 @@ if (typeof J$ === 'undefined') {
         }
 
         if (!skip && typeof code === 'string' && code.indexOf(noInstr) < 0) {
-            try {
+            //try {
                 code = removeShebang(code);
                 iidSourceInfo = {};
                 var newAst;
@@ -2008,10 +2008,10 @@ if (typeof J$ === 'undefined') {
                 newAst = hoistFunctionDeclaration(newAst, hoistedFcts);
                 var newCode = esotope.generate(newAst, {comment: true ,parse: acorn.parse});
                 code = newCode + "\n" + noInstr + "\n";
-            } catch(ex) {
-                console.log("Failed to instrument", code);
-                throw ex;
-            }
+            //} catch(ex) {
+            //    console.log("Failed to instrument code"); //, code);
+            //    throw ex;
+            //}
         }
 
         var tmp = {};
