@@ -241,6 +241,14 @@ function analyze(script, clientAnalyses, initParam) {
         });
     }
     cliArgs.push(script);
+    
+    // we can't run child processes with --inspect (debug port will be in use)
+    // so remove these arguments
+    var debugArgIdx = process.execArgv.indexOf('--inspect');
+    if (debugArgIdx !== -1) { process.execArgv.splice(debugArgIdx, 1); }
+    debugArgIdx = process.execArgv.indexOf('--inspect-brk');
+    if (debugArgIdx !== -1) { process.execArgv.splice(debugArgIdx, 1); }
+    
     var proc = cp.fork(directJSScript, cliArgs, { silent: true });
     return runChildAndCaptureOutput(proc);
 }
