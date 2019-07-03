@@ -1612,7 +1612,6 @@ if (typeof J$ === 'undefined') {
 
     function funCond(node) {
         var ret = wrapConditional(node.test, node.test);
-        var condId = ret.iid;
         node.test = ret;
         node.test = wrapWithX1(node, node.test);
         node.init = wrapWithX1(node, node.init);
@@ -1621,6 +1620,9 @@ if (typeof J$ === 'undefined') {
         // TODO: types of conditionals:
         // ConditionalExpression (?-Operator), Logical Shortcuts (x || y, x && y), IfStatement, ForStatement, WhileStatement, Do-While, SwitchStatement
         // TODO: what happens on Exceptions?!
+
+        // ret may be null in case of for(;;)
+        var condId = ret ? ret.iid : node.iid;
 
         if (node.consequent) {
           node.consequent = wrapConsequent(condId, node.consequent);
