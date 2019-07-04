@@ -234,7 +234,12 @@ function analyze(script, clientAnalyses, initParam) {
         cliArgs.push('--analysis');
         cliArgs.push(analysis);
     });
+    var inspectJalangi = false;
     if (initParam) {
+        if (initParam.inspectJalangi) {
+          inspectJalangi = true;
+          delete initParam.inspectJalangi;
+        }
         Object.keys(initParam).forEach(function (k) {
             cliArgs.push('--initParam')
             cliArgs.push(k + ':' + initParam[k]);
@@ -248,6 +253,9 @@ function analyze(script, clientAnalyses, initParam) {
     if (debugArgIdx !== -1) { process.execArgv.splice(debugArgIdx, 1); }
     debugArgIdx = process.execArgv.indexOf('--inspect-brk');
     if (debugArgIdx !== -1) { process.execArgv.splice(debugArgIdx, 1); }
+    
+    // provide means to debug into jalangi process through -inspectJalangi option
+    if (inspectJalangi) { process.execArgv.push('--inspect-brk'); }
     
     var proc = cp.fork(directJSScript, cliArgs, { silent: true });
     return runChildAndCaptureOutput(proc);
