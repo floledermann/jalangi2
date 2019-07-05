@@ -1897,10 +1897,10 @@ if (typeof J$ === 'undefined') {
                     var assignStmt;
                     if (ast.body[i].body === null) {
                         assignStmt = acorn.parse(
-                            "var " + name + " = function " + name + "(" + params + ") {}").body;
+                            "var " + name + " = function(" + params + ") {}").body;
                     } else {
                         assignStmt = replaceInStatement(
-                            "var " + name + " = function " + name + "(" + params + ") { " + RP + "1 }",
+                            "var " + name + " = function(" + params + ") { " + RP + "1 }",
                             ast.body[i].body.body);
                     }
                     newBody.push(assignStmt[0]);
