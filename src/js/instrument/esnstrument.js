@@ -97,6 +97,7 @@ if (typeof J$ === 'undefined') {
     var logBinaryOpFunName = JALANGI_VAR + ".B";
     var logUnaryOpFunName = JALANGI_VAR + ".U";
     var logConditionalFunName = JALANGI_VAR + ".C";
+    var logEndConditionalConsequentFunName = JALANGI_VAR + ".Cx";
     var logSwitchLeftFunName = JALANGI_VAR + ".C1";
     var logSwitchRightFunName = JALANGI_VAR + ".C2";
     var logLastFunName = JALANGI_VAR + "._";
@@ -808,11 +809,12 @@ if (typeof J$ === 'undefined') {
     }
 
     function wrapConditional(node, test) {
-        if (node === null) {
-            return node;
-        } // to handle for(;;) ;
 
         if (!Config.INSTR_CONDITIONAL || Config.INSTR_CONDITIONAL("other", node)) {
+            // handle for(;;)
+            if (node === null) {
+                return node;
+            } 
             printCondIidToLoc(node);
             var iid = getCondIid();
             var ret = replaceInExpr(
@@ -1557,58 +1559,72 @@ if (typeof J$ === 'undefined') {
     
     function wrapConsequent(condIid, consequent) {
       
-      // disable for now...
-      return consequent;
+      if (!Config.INSTR_CONSEQUENT || Config.INSTR_CONSEQUENT(consequent)) {
       
-      // TODO wrap consequent
-      let consTree = {
-          "type": "BlockStatement",
-          "body": [
-              {
-                  "type": "TryStatement",
-                  "block": {
-                      "type": "BlockStatement",
-                      "body": [
-                        // original statements go here
-                       ]
-                  },
-                  "handler": null,
-                  "finalizer": {
-                      "type": "BlockStatement",
-                      "body": [
-                          {
-                              "type": "ExpressionStatement",
-                              "expression": {
-                                  "type": "CallExpression",
-                                  "callee": {
-                                      "type": "MemberExpression",
-                                      "computed": false,
-                                      "object": {
-                                          "type": "Identifier",
-                                          "name": JALANGI_VAR
-                                      },
-                                      "property": {
-                                          "type": "Identifier",
-                                          "name": "Cx"
-                                      }
-                                  },
-                                  "arguments": [
-                                      condIid
-                                  ]
-                              }
-                          }
-                      ]
-                  }
-              }
-          ]
-      }
-      if (consequent.type == "BlockStatement") {
-        consTree.body[0].block = consequent;
+        // TODO wrap consequent
+        //console.log(condIid);
+        //console.log("{ try { } finally { " + logEndConditionalConsequentFunName + "(" + condIid + "); } }");
+        
+        // acorn.parse returns a "Program" node, so take first stmt of that program (which is our block stmt)
+        let consTree = acorn.parse(
+           "{ try { } finally { " + logEndConditionalConsequentFunName + "(" + condIid + "); } }"
+        ).body[0];
+        
+        //console.log(consTree);
+        /*
+        let consTree = {
+            "type": "BlockStatement",
+            "body": [
+                {
+                    "type": "TryStatement",
+                    "block": {
+                        "type": "BlockStatement",
+                        "body": [
+                          // original statements go here
+                         ]
+                    },
+                    "handler": null,
+                    "finalizer": {
+                        "type": "BlockStatement",
+                        "body": [
+                            {
+                                "type": "ExpressionStatement",
+                                "expression": {
+                                    "type": "CallExpression",
+                                    "callee": {
+                                        "type": "MemberExpression",
+                                        "computed": false,
+                                        "object": {
+                                            "type": "Identifier",
+                                            "name": JALANGI_VAR
+                                        },
+                                        "property": {
+                                            "type": "Identifier",
+                                            "name": "Cx"
+                                        }
+                                    },
+                                    "arguments": [
+                                        condIid
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+        */
+        if (consequent.type == "BlockStatement") {
+          consTree.body[0].block = consequent;
+        }
+        else {
+          consTree.body[0].block[0] = consequent;
+        }
+        return consTree;
       }
       else {
-        consTree.body[0].block[0] = consequent;
+        return consequent;
       }
-      return consTree;
     }
 
     function funCond(node) {
@@ -1623,7 +1639,8 @@ if (typeof J$ === 'undefined') {
         // TODO: what happens on Exceptions?!
 
         // ret may be null in case of for(;;)
-        var condId = ret ? ret.iid : node.iid;
+        // iid is a *parse tree literal node*, so take value
+        var condId = ret ? ret.iid.value : node.iid.value;
 
         if (node.consequent) {
           node.consequent = wrapConsequent(condId, node.consequent);
