@@ -1639,8 +1639,8 @@ if (typeof J$ === 'undefined') {
         // TODO: what happens on Exceptions?!
 
         // ret may be null in case of for(;;)
-        // iid is a *parse tree literal node*, so take value
-        var condId = ret ? ret.iid.value : node.iid.value;
+        // ret.iid is a *parse tree literal node*, so take value
+        var condId = ret ? ret.iid.value : null; //node.iid.value;
 
         if (node.consequent) {
           node.consequent = wrapConsequent(condId, node.consequent);
