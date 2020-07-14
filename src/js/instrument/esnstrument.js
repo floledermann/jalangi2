@@ -1559,19 +1559,24 @@ if (typeof J$ === 'undefined') {
     
     function wrapConsequent(condIid, consequent) {
       
-      if (!Config.INSTR_CONSEQUENT || Config.INSTR_CONSEQUENT(consequent)) {
+      if (
+        Config.INSTR_CONSEQUENT === true ||
+        (typeof Config.INSTR_CONSEQUENT == "function" && Config.INSTR_CONSEQUENT(consequent))
+      ) {
       
         // TODO wrap consequent
         //console.log(condIid);
         //console.log("{ try { } finally { " + logEndConditionalConsequentFunName + "(" + condIid + "); } }");
         
         // acorn.parse returns a "Program" node, so take first stmt of that program (which is our block stmt)
+        // wrap the whole consequent in a try statement and capture the end in finally block
+        // to make sure it is triggered even in case of exceptions
         let consTree = acorn.parse(
            "{ try { } finally { " + logEndConditionalConsequentFunName + "(" + condIid + "); } }"
         ).body[0];
         
-        //console.log(consTree);
-        /*
+        // The resulting tree will look like this:
+        /* 
         let consTree = {
             "type": "BlockStatement",
             "body": [
@@ -1579,9 +1584,7 @@ if (typeof J$ === 'undefined') {
                     "type": "TryStatement",
                     "block": {
                         "type": "BlockStatement",
-                        "body": [
-                          // original statements go here
-                         ]
+                        "body": [ / * original statements go here * / ]
                     },
                     "handler": null,
                     "finalizer": {
