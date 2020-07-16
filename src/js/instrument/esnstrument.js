@@ -1637,9 +1637,9 @@ if (typeof J$ === 'undefined') {
         node.init = wrapWithX1(node, node.init);
         node.update = wrapWithX1(node, node.update);
         
-        // TODO: types of conditionals:
-        // ConditionalExpression (?-Operator), Logical Shortcuts (x || y, x && y), IfStatement, ForStatement, WhileStatement, Do-While, SwitchStatement
-        // TODO: what happens on Exceptions?!
+        // types of conditionals:
+        // with test attribute: IfStatement, ForStatement, WhileStatement, Do-While
+        // without: ConditionalExpression (?-Operator), Logical Shortcuts (x || y, x && y), SwitchStatement
 
         // ret may be null in case of for(;;)
         // ret.iid is a *parse tree literal node*, so take value
@@ -1651,6 +1651,16 @@ if (typeof J$ === 'undefined') {
         if (node.alternate) {
           node.alternate = wrapConsequent(condId, node.alternate);
         }
+        // these have a "test" attribute (wrapped above) and a "body"
+        let testAndBody = ['WhileStatement','DoWhileStatement','ForStatement'];
+        if (testAndBody.includes(node.type) && node.body) {
+          node.body = wrapConsequent(condId, node.body);
+        }
+          
+        // TODO: 'SwitchCase'
+        
+        // probably ignore: 'ForInStatement','ForOfStatement'
+        
         return node;
     }
 
