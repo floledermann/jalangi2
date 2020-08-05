@@ -98,6 +98,7 @@ if (typeof J$ === 'undefined') {
     var logUnaryOpFunName = JALANGI_VAR + ".U";
     var logConditionalFunName = JALANGI_VAR + ".C";
     var logEndConditionalConsequentFunName = JALANGI_VAR + ".Cx";
+    var logEndConditionalExpressionFunName = JALANGI_VAR + ".Cy";
     var logSwitchLeftFunName = JALANGI_VAR + ".C1";
     var logSwitchRightFunName = JALANGI_VAR + ".C2";
     var logLastFunName = JALANGI_VAR + "._";
@@ -1630,6 +1631,26 @@ if (typeof J$ === 'undefined') {
       }
     }
 
+    function wrapConsequentExpression(iid, node) {
+      //printIidToLoc(node);
+      if (
+        Config.INSTR_CONSEQUENT === true ||
+        (typeof Config.INSTR_CONSEQUENT == "function" && Config.INSTR_CONSEQUENT(consequent))
+      ) {
+        var ret = replaceInExpr(
+            logEndConditionalExpressionFunName + "(" + RP + "1, " + RP + "2)",
+            iid,
+            node
+        );
+        transferLoc(ret, node);
+        
+        return ret;  
+      }
+      
+      return node;
+      
+    }
+    
     function funCond(node) {
         var ret = wrapConditional(node.test, node.test);
         node.test = ret;
@@ -1645,12 +1666,20 @@ if (typeof J$ === 'undefined') {
         // ret.iid is a *parse tree literal node*, so take value
         var condId = ret ? ret.iid.value : null; //node.iid.value;
 
-        if (node.consequent) {
-          node.consequent = wrapConsequent(condId, node.consequent);
+        // we cannot use "try" approach for ConsitionalExpression (?-Operator)
+        // we need to wrap the expression instead!
+        if (node.type == 'ConditionalExpression') {
+           node = wrapConsequentExpression(ret.iid, node);
         }
-        if (node.alternate) {
-          node.alternate = wrapConsequent(condId, node.alternate);
+        else {
+          if (node.consequent) {
+            node.consequent = wrapConsequent(condId, node.consequent);
+          }
+          if (node.alternate) {
+            node.alternate = wrapConsequent(condId, node.alternate);
+          }
         }
+        
         // these have a "test" attribute (wrapped above) and a "body"
         let testAndBody = ['WhileStatement','DoWhileStatement','ForStatement'];
         if (testAndBody.includes(node.type) && node.body) {
